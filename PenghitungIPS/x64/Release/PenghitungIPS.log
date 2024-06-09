@@ -1,0 +1,8 @@
+﻿  pch.cpp
+  PenghitungIPS.cpp
+  PenghitungIPSDlg.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 212 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  PenghitungIPS.vcxproj -> D:\Microsoft Visual Studio 2022\Projects\PenghitungIPS\x64\Release\PenghitungIPS.exe
