@@ -8,12 +8,6 @@
 #define new DEBUG_NEW
 #endif
 
-BEGIN_MESSAGE_MAP(CPenghitungIPSDlg, CDialogEx)
-    ON_BN_CLICKED(IDC_BUTTON_ADD, &CPenghitungIPSDlg::OnBnClickedButtonAdd)
-    ON_BN_CLICKED(IDC_BUTTON_CALCULATE, &CPenghitungIPSDlg::OnBnClickedButtonCalculate)
-    ON_BN_CLICKED(IDC_BUTTON_DELETE, &CPenghitungIPSDlg::OnBnClickedButtonDelete)
-END_MESSAGE_MAP()
-
 CPenghitungIPSDlg::CPenghitungIPSDlg(CWnd* pParent /*=nullptr*/)
     : CDialogEx(IDD_PENGHITUNGIPS_DIALOG, pParent)
 {
@@ -23,193 +17,177 @@ CPenghitungIPSDlg::CPenghitungIPSDlg(CWnd* pParent /*=nullptr*/)
 void CPenghitungIPSDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_EDIT_MATKUL, m_editMatkul);
-    DDX_Control(pDX, IDC_EDIT_SKS, m_editSKS);
-    DDX_Control(pDX, IDC_COMBO_NILAI, m_comboNilai);
-    DDX_Control(pDX, IDC_BUTTON_ADD, m_buttonAdd);
-    DDX_Control(pDX, IDC_BUTTON_CALCULATE, m_buttonCalculate);
-    DDX_Control(pDX, IDC_BUTTON_DELETE, m_buttonDelete);
+    DDX_Control(pDX, IDC_MATKUL_EDIT, m_matkulEdit);
+    DDX_Control(pDX, IDC_SKS_EDIT, m_sksEdit);
+    DDX_Control(pDX, IDC_NILAI_COMBO, m_nilaiComboBox);
     DDX_Control(pDX, IDC_LIST_CTRL, m_listCtrl);
-    DDX_Control(pDX, IDC_STATUS_LABEL, m_statusLabel);
     DDX_Control(pDX, IDC_IPS_LABEL, m_ipsLabel);
+    DDX_Control(pDX, IDC_STATUS_LABEL, m_statusLabel);
 }
+
+BEGIN_MESSAGE_MAP(CPenghitungIPSDlg, CDialogEx)
+    ON_WM_SYSCOMMAND()
+    ON_WM_PAINT()
+    ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_ADD_BUTTON, &CPenghitungIPSDlg::OnBnClickedAddButton)
+    ON_BN_CLICKED(IDC_DELETE_BUTTON, &CPenghitungIPSDlg::OnBnClickedDeleteButton)
+END_MESSAGE_MAP()
 
 BOOL CPenghitungIPSDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
 
-    //SetIcon(m_hIcon, TRUE);  // Set big icon
-    //SetIcon(m_hIcon, FALSE); // Set small icon
+    ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+    ASSERT(IDM_ABOUTBOX < 0xF000);
 
-    // Initialize controls
-    m_comboNilai.AddString(_T("A"));
-    m_comboNilai.AddString(_T("AB"));
-    m_comboNilai.AddString(_T("B"));
-    m_comboNilai.AddString(_T("BC"));
-    m_comboNilai.AddString(_T("C"));
-    m_comboNilai.AddString(_T("D"));
-    m_comboNilai.AddString(_T("E"));
-        
-    // Initialize the list control
-    m_listCtrl.InsertColumn(0, _T("Mata Kuliah"), LVCFMT_LEFT, 150);
+    CMenu* pSysMenu = GetSystemMenu(FALSE);
+    if (pSysMenu != nullptr)
+    {
+        BOOL bNameValid;
+        CString strAboutMenu;
+        bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+        if (!strAboutMenu.IsEmpty())
+        {
+            pSysMenu->AppendMenu(MF_SEPARATOR);
+            pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+        }
+    }
+
+    SetIcon(m_hIcon, TRUE);          
+
+    m_listCtrl.InsertColumn(0, _T("Mata Kuliah"), LVCFMT_LEFT, 100);
     m_listCtrl.InsertColumn(1, _T("SKS"), LVCFMT_LEFT, 50);
     m_listCtrl.InsertColumn(2, _T("Nilai"), LVCFMT_LEFT, 50);
 
-    m_listCtrl.SetExtendedStyle(m_listCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-    m_listCtrl.ModifyStyle(0, LVS_REPORT);
+    m_nilaiComboBox.AddString(_T("A"));
+    m_nilaiComboBox.AddString(_T("AB"));
+    m_nilaiComboBox.AddString(_T("B"));
+    m_nilaiComboBox.AddString(_T("BC"));
+    m_nilaiComboBox.AddString(_T("C"));
+    m_nilaiComboBox.AddString(_T("D"));
+    m_nilaiComboBox.AddString(_T("E"));
 
-
-    return TRUE;  // return TRUE unless you set the focus to a control
+    return TRUE;
 }
 
-void CPenghitungIPSDlg::OnBnClickedButtonAdd()
+void CPenghitungIPSDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-    CString matkul, sks, nilai;
-    m_editMatkul.GetWindowText(matkul);
-    m_editSKS.GetWindowText(sks);
-    int nSel = m_comboNilai.GetCurSel();
-    if (nSel != CB_ERR)
+    if ((nID & 0xFFF0) == IDM_ABOUTBOX)
     {
-        m_comboNilai.GetLBText(nSel, nilai);
-    }
-
-    if (matkul.IsEmpty() || sks.IsEmpty() || nilai.IsEmpty())
-    {
-        AfxMessageBox(_T("Please fill all fields."));
-        return;
-    }
-
-    // Debugging: Display values
-    CString debugMsg;
-    debugMsg.Format(_T("Matkul: %s, SKS: %s, Nilai: %s"), matkul, sks, nilai);
-    AfxMessageBox(debugMsg);
-
-    // Convert sks to integer
-    int sksVal = _ttoi(sks);
-    if (sksVal <= 0)
-    {
-        AfxMessageBox(_T("Please enter a valid number for SKS."));
-        return;
-    }
-
-    // Add the course to the list control
-    int nIndex = m_listCtrl.GetItemCount(); // Get the current item count
-    nIndex = m_listCtrl.InsertItem(nIndex, matkul); // Insert at the end
-    if (nIndex != -1)
-    {
-        m_listCtrl.SetItemText(nIndex, 1, sks);
-        m_listCtrl.SetItemText(nIndex, 2, nilai);
-
-        // Debugging: Confirm item added
-        AfxMessageBox(_T("Item added successfully."));
-
-        // Clear the input fields after adding the item
-        m_editMatkul.SetWindowText(_T(""));
-        m_editSKS.SetWindowText(_T(""));
-        m_comboNilai.SetCurSel(-1);
+        CDialogEx dlgAbout;
+        dlgAbout.DoModal();
     }
     else
     {
-        AfxMessageBox(_T("Failed to add item."));
+        CDialogEx::OnSysCommand(nID, lParam);
     }
 }
 
-void CPenghitungIPSDlg::OnBnClickedButtonCalculate()
+void CPenghitungIPSDlg::OnPaint()
 {
-    int nItemCount = m_listCtrl.GetItemCount();
-    if (nItemCount == 0)
+    if (IsIconic())
     {
-        AfxMessageBox(_T("No data to calculate."));
-        return;
-    }
+        CPaintDC dc(this);
 
-    float totalPoints = 0.0f;
-    int totalSKS = 0;
+        SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-    for (int i = 0; i < nItemCount; ++i)
-    {
-        CString sksStr = m_listCtrl.GetItemText(i, 1);
-        CString gradeStr = m_listCtrl.GetItemText(i, 2);
+        // Center icon in client rectangle
+        int cxIcon = GetSystemMetrics(SM_CXICON);
+        int cyIcon = GetSystemMetrics(SM_CYICON);
+        CRect rect;
+        GetClientRect(&rect);
+        int x = (rect.Width() - cxIcon + 1) / 2;
+        int y = (rect.Height() - cyIcon + 1) / 2;
 
-        int sks = _ttoi(sksStr);
-        float grade = ConvertGrade(gradeStr);
-
-        totalPoints += sks * grade;
-        totalSKS += sks;
-    }
-
-    if (totalSKS == 0)
-    {
-        AfxMessageBox(_T("Total SKS is zero, cannot calculate IPS."));
-        return;
-    }
-
-    float ips = totalPoints / totalSKS;
-    CString ipsStr;
-    ipsStr.Format(_T("IPS: %.2f"), ips);
-    m_ipsLabel.SetWindowText(ipsStr);
-}
-
-void CPenghitungIPSDlg::OnBnClickedButtonDelete()
-{
-    int nSelected = m_listCtrl.GetNextItem(-1, LVNI_SELECTED);
-    if (nSelected != -1)
-    {
-        m_listCtrl.DeleteItem(nSelected);
-        // Calculate IPS after deleting an item
-        calculateIPS();
+        // Draw the icon
+        dc.DrawIcon(x, y, m_hIcon);
     }
     else
     {
-        AfxMessageBox(_T("No row selected."));
+        CDialogEx::OnPaint();
     }
 }
 
-float CPenghitungIPSDlg::ConvertGrade(const CString& grade)
+HCURSOR CPenghitungIPSDlg::OnQueryDragIcon()
+{
+    return static_cast<HCURSOR>(m_hIcon);
+}
+
+float CPenghitungIPSDlg::convertGrade(const CString& grade)
 {
     if (grade == _T("A")) return 4.0f;
-    if (grade == _T("AB")) return 3.5f;
-    if (grade == _T("B")) return 3.0f;
-    if (grade == _T("BC")) return 2.5f;
-    if (grade == _T("C")) return 2.0f;
-    if (grade == _T("D")) return 1.0f;
-    if (grade == _T("E")) return 0.0f;
-    return 0.0f;
+    else if (grade == _T("AB")) return 3.5f;
+    else if (grade == _T("B")) return 3.0f;
+    else if (grade == _T("BC")) return 2.5f;
+    else if (grade == _T("C")) return 2.0f;
+    else if (grade == _T("D")) return 1.0f;
+    else if (grade == _T("E")) return 0.0f;
+    else return -1;
 }
 
 void CPenghitungIPSDlg::calculateIPS()
 {
-    int nItemCount = m_listCtrl.GetItemCount();
-    if (nItemCount == 0)
-    {
-        m_ipsLabel.SetWindowText(_T("Tidak ada SKS yang diinput."));
+    float sum = 0;
+    int totalSKS = 0;
+    for (int i = 0; i < m_listCtrl.GetItemCount(); ++i) {
+        CString sksText = m_listCtrl.GetItemText(i, 1);
+        CString nilaiText = m_listCtrl.GetItemText(i, 2);
+        int sks = _ttoi(sksText);
+        float nilaiAngka = convertGrade(nilaiText);
+
+        if (nilaiAngka != -1) {
+            sum += nilaiAngka * sks;
+            totalSKS += sks;
+        }
+    }
+
+    CString ipsText;
+    if (totalSKS > 0) {
+        float ips = sum / totalSKS;
+        ipsText.Format(_T("IPS: %.2f"), ips);
+    }
+    else {
+        ipsText = _T("Terdapat data yang belum diinput.");
+    }
+    m_ipsLabel.SetWindowTextW(ipsText);
+}
+
+void CPenghitungIPSDlg::OnBnClickedAddButton()
+{
+    CString namaMatkul, sksText, nilai;
+    m_matkulEdit.GetWindowTextW(namaMatkul);
+    m_sksEdit.GetWindowTextW(sksText);
+    m_nilaiComboBox.GetWindowTextW(nilai);
+
+    int sks = _ttoi(sksText);
+    float nilaiAngka = convertGrade(nilai);
+
+    if (nilaiAngka == -1 || sks <= 0 || namaMatkul.IsEmpty()) {
+        m_statusLabel.SetWindowTextW(_T("Input tidak valid."));
         return;
     }
 
-    float totalPoints = 0.0f;
-    int totalSKS = 0;
+    int rowCount = m_listCtrl.GetItemCount();
+    m_listCtrl.InsertItem(rowCount, namaMatkul);
+    m_listCtrl.SetItemText(rowCount, 1, sksText);
+    m_listCtrl.SetItemText(rowCount, 2, nilai);
 
-    for (int i = 0; i < nItemCount; ++i)
-    {
-        CString sksStr = m_listCtrl.GetItemText(i, 1);
-        CString gradeStr = m_listCtrl.GetItemText(i, 2);
+    m_matkulEdit.SetWindowTextW(_T(""));
+    m_sksEdit.SetWindowTextW(_T(""));
+    m_nilaiComboBox.SetCurSel(0);
 
-        int sks = _ttoi(sksStr);
-        float grade = ConvertGrade(gradeStr);
+    m_statusLabel.SetWindowTextW(_T("Mata kuliah berhasil ditambahkan."));
+    calculateIPS();
+}
 
-        totalPoints += sks * grade;
-        totalSKS += sks;
+void CPenghitungIPSDlg::OnBnClickedDeleteButton()
+{
+    POSITION pos = m_listCtrl.GetFirstSelectedItemPosition();
+    while (pos) {
+        int nItem = m_listCtrl.GetNextSelectedItem(pos);
+        m_listCtrl.DeleteItem(nItem);
+        pos = m_listCtrl.GetFirstSelectedItemPosition();
     }
-
-    if (totalSKS > 0)
-    {
-        float ips = totalPoints / totalSKS;
-        CString ipsStr;
-        ipsStr.Format(_T("IPS: %.2f"), ips);
-        m_ipsLabel.SetWindowText(ipsStr);
-    }
-    else
-    {
-        m_ipsLabel.SetWindowText(_T("Total SKS is zero, cannot calculate IPS."));
-    }
+    calculateIPS();
+    m_statusLabel.SetWindowTextW(_T(""));
 }

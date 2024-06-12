@@ -3,19 +3,19 @@
 // Used by PenghitungIPS.rc
 //
 
+#define IDM_ABOUTBOX                    0x0010
+#define IDD_ABOUTBOX                    100
+#define IDS_ABOUTBOX                    101
 #define IDD_PENGHITUNGIPS_DIALOG        102
 #define IDR_MAINFRAME                   128
-#define IDC_EDIT_MATKUL                 1000
-#define IDC_EDIT_SKS                    1001
-#define IDC_COMBO_NILAI                 1002
-#define IDC_BUTTON_ADD                  1003
-#define IDC_BUTTON_CALCULATE            1004
-#define IDC_BUTTON_DELETE               1005
-#define IDC_LIST_CTRL                   1006
-#define IDC_STATUS_LABEL                1007
-#define IDC_IPS_LABEL                   1008
-
-
+#define IDC_MATKUL_EDIT                 1009
+#define IDC_SKS_EDIT                    1001
+#define IDC_NILAI_COMBO                 1002
+#define IDC_LIST_CTRL                   1003
+#define IDC_IPS_LABEL                   1004
+#define IDC_STATUS_LABEL                1005
+#define IDC_ADD_BUTTON                  1006
+#define IDC_DELETE_BUTTON               1007
 
 // Next default values for new objects
 // 

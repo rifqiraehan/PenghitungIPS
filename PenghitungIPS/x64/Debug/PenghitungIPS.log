@@ -1,2 +1,2 @@
 ﻿  PenghitungIPSDlg.cpp
-LINK : fatal error LNK1168: cannot open D:\Microsoft Visual Studio 2022\Projects\PenghitungIPS\x64\Debug\PenghitungIPS.exe for writing
+  PenghitungIPS.vcxproj -> D:\Microsoft Visual Studio 2022\Projects\PenghitungIPS\x64\Debug\PenghitungIPS.exe
